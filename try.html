@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <title>Motion viewer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <script src="jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  
+</head>
+
+<body>
+
+<div class="container">
+<div class = "page-header" >
+	<img src="images/logo.png" height="75" width="300" class="img-responsive" alt="Cinque Terre"/>
+	</div>	
+	<div class="navbar navbar-inverse">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" 
+                     data-toggle="collapse" 
+                    data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+				 <span class="icon-bar"></span>
+            </button>
+        </div>
+		
+		
+   <div class="collapse navbar-collapse">
+			  <ul class="nav navbar-nav">
+				 <li ><a href="index.html" title='Home'><img src="images/home.png" height="40" width="40"></a></li>
+				<li class="active"><a href="try.html">Try it yourself!</a></li>
+				<li><a href="theory.html">Theory</a></li>
+				<li><a><button class="btn btn-primary"  data-toggle="modal" data-target="#myModalNorm">Launch The Application</button></a></li>
+				<li><a id="menu"></a></li>
+			  </ul>
+	</div>
+	
+	</div>
+	<div class="row">
+        <div class="col-md-4">	<p id="button"></p>
+          
+		   </div>
+	
+	</div>		 <canvas id="myCanvas" height="400px" width="1100px" class="img-responsive" ></canvas>   <script>
+<!-- Draw a line in the canvas for floor -->
+
+
+<!-- End -->
+<!-- Set the timer -->
+
+var myVar = setInterval(myTimer, 1000);
+
+function myTimer() 
+{
+    var d = new Date();
+    document.getElementById("time").innerHTML = d.toLocaleTimeString();
+}
+
+<!-- End -->
+
+<!-- Variables-->
+var motw;
+var motmp;
+var how;
+var alpha;
+var r;
+var m;
+var l;
+var t;
+var g = 10;
+var a;
+var A;
+var vmass;
+var vwedge;
+var tmass;
+var vwedge;
+var linearSpeed = 0;
+var verticalSpeed = 0;
+<!-- End -->
+
+<!-- reset the timer -->
+
+     window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+<!-- End -->
+
+<!-- Draw the triangle -->
+
+     function drawTriangle(myTriangle, context) {
+		r=how;
+		m=r/Math.sin(Math.PI * (alpha) / 180.0);
+		l=Math.sqrt((m*m)-(r*r));
+	
+			context.beginPath();
+
+			a1=myTriangle.x2-l;
+			b1=myTriangle.y2;
+
+			a2=myTriangle.x2;
+			b2=myTriangle.y2;
+
+			a3=myTriangle.x2;
+			b3=myTriangle.y2-r;
+
+			context.lineTo(a1,b1);
+			context.lineTo(a2,b2);
+			context.lineTo(a3,b3);
+				context.stroke();
+			context.fillStyle = '#000000';
+			context.fill();
+			context.lineWidth = myTriangle.borderWidth;
+			context.beginPath();
+context.moveTo(10,350);
+context.lineTo(1090,350);
+context.stroke();
+      }
+	  
+<!-- End -->
+
+<!-- Draw the mass particle -->
+
+function drawMassParticle(myMassParticle,context)
+{
+context.beginPath();
+context.arc(myMassParticle.centerX,myMassParticle.centerY-how,myMassParticle.radius,0,2*Math.PI);
+context.stroke();
+context.fillStyle = '#000000';
+context.fill();
+}
+
+<!-- End -->
+
+<!-- Calculate the real values -->
+
+function cal()
+{
+		var constant=(motw+(motmp*(Math.sin(Math.PI * (alpha) / 180.0)*Math.sin(Math.PI * (alpha) / 180.0))));
+		a = ((motmp+motw)*g * Math.sin(Math.PI * (alpha) / 180.0))/constant;
+		A =  motmp * g * Math.sin(Math.PI * (alpha) / 180.0) * Math.cos(Math.PI * (alpha) / 180.0)/constant;
+} 
+
+<!-- End -->
+
+
+<!-- Animation part -->
+      function animate(myTriangle,myMassParticle, canvas, context, startTime) {
+        
+        var time = (new Date()).getTime() - startTime;
+   
+		var verticalSpeed = r*100/l;
+
+        var linearSpeed = 100;
+		var limit=parseInt(r)+345;
+        var newX = linearSpeed * time / 1000+550;
+		var newXMass = 545-linearSpeed * time / 1000;
+		var newY = verticalSpeed * time / 1000+345;
+		
+        if(newX < canvas.width-10 ) {
+          myTriangle.x2 = newX;
+        }
+		if( newY< limit)
+		{
+		  myMassParticle.centerY = newY;
+		  myMassParticle.centerX = 545;
+		}
+		if(newY>=limit && newXMass>10)
+		{
+		myMassParticle.centerX=newXMass;
+		}
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawTriangle(myTriangle, context);
+        drawMassParticle(myMassParticle, context);
+        requestAnimFrame(function()
+        {
+          animate(myTriangle,myMassParticle, canvas, context, startTime);
+        });
+      }
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+	  
+	  <!-- End -->
+	  
+<!-- Variables for triangle -->
+
+var myTriangle = {
+			
+		 x2 : 550,
+		 y2 : 350,  
+		 borderWidth: 1
+
+     };
+						
+<!-- End -->
+
+<!-- Variables for mass particle -->
+
+ var myMassParticle  = 
+						{
+							centerX : 545,
+							centerY : 345,
+							radius : 5
+							
+						};
+						
+<!-- End -->
+
+drawTriangle(myTriangle, context);
+drawMassParticle(myMassParticle,context);
+
+<!-- Get the values for the variables -->
+
+function begin()
+{
+motw=document.getElementById('motw').value;
+motmp=document.getElementById('motmp').value;
+how=document.getElementById('how').value;
+alpha=document.getElementById('alpha').value;
+drawMassParticle(myMassParticle,context);
+drawTriangle(myTriangle, context);
+}
+
+<!-- End -->
+
+
+	function drawall()
+	{
+		       var startTime = (new Date()).getTime();
+        animate(myTriangle,myMassParticle, canvas, context, startTime);
+	}
+
+function refresh() {
+    location.reload();
+}
+
+   function check_empty() {
+  
+if (document.getElementById('motw').value == "" || document.getElementById('motmp').value == "" || document.getElementById('how').value == "") {
+alert("Fill All Fields !");
+} else {
+document.getElementById('form').submit();
+}
+}
+
+function animatebutton()
+{
+var options = document.getElementById("menu");
+   options.innerHTML = options.innerHTML +'<button type="submit" class="btn btn-primary" onclick="drawall();">Animate</button>';
+}
+
+function resetbutton()
+{
+var options = document.getElementById("menu");
+   options.innerHTML = options.innerHTML +' <button type="submit" class="btn btn-primary" onclick="refresh();">Reset</button>';
+}
+
+function massa()
+{
+var options = document.getElementById("menu");
+   options.innerHTML = options.innerHTML +' <button type="submit" class="btn btn-primary" onclick="massaccelarationbutton();">a(Mass)</button>';
+}
+
+function wedgea()
+{
+var options = document.getElementById("menu");
+   options.innerHTML = options.innerHTML +' <button type="submit" class="btn btn-primary" onclick="wedgeaccelarationbutton();">a(Wedge)</button>';
+}
+
+function vmass()
+{
+var options = document.getElementById("menu");
+   options.innerHTML = options.innerHTML +' <button type="submit" class="btn btn-primary" onclick="massvelocitybutton();">v(Mass)</button>';
+}
+function vwedge()
+{
+var options = document.getElementById("menu");
+   options.innerHTML = options.innerHTML +' <button type="submit" class="btn btn-primary" onclick="wedgevelocitybutton();">v(Wedge)</button>';
+}
+function tboth()
+{
+var options = document.getElementById("menu");
+   options.innerHTML = options.innerHTML +' <button type="submit" class="btn btn-primary" onclick="timebutton();">t(Time)</button>';
+}
+
+function massaccelarationbutton()
+{
+theta = alpha;
+		var constant=(motw+(motmp*(Math.sin(Math.PI * (theta) / 180.0)*Math.sin(Math.PI * (theta) / 180.0))));
+		a = ((motmp+motw)*g * Math.sin(Math.PI * (theta) / 180.0))/constant;
+		var options = document.getElementById("button");
+		options.innerHTML = options.innerHTML +' <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Accelaration of Mass Particle : </strong>'+a+'<strong> m/(s*s)</strong></div>';
+
+}
+
+function wedgeaccelarationbutton()
+{
+        theta = alpha;
+		var constant=(motw+(motmp*(Math.sin(Math.PI * (theta) / 180.0)*Math.sin(Math.PI * (theta) / 180.0))));
+		A =  motmp * g * Math.sin(Math.PI * (theta) / 180.0) * Math.cos(Math.PI * (theta) / 180.0)/constant;
+     	var options = document.getElementById("button");
+		options.innerHTML = options.innerHTML +' <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Accelaration of Wedge : </strong>'+A+'<strong> m/(s*s)</strong></div>';
+
+} 
+
+function massvelocitybutton()
+{
+theta = alpha;
+var constant=(motw+(motmp*(Math.sin(Math.PI * (theta) / 180.0)*Math.sin(Math.PI * (theta) / 180.0))));
+		a = ((motmp+motw)*g * Math.sin(Math.PI * (theta) / 180.0))/constant;    
+        vmass=Math.sqrt(2*m*a);
+     	var options = document.getElementById("button");
+		options.innerHTML = options.innerHTML +' <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Velocity of Mass when it arrives bottom of the wedge : </strong>'+vmass+'<strong> m/s</strong></div>';
+
+} 
+
+function wedgevelocitybutton()
+{  
+theta = alpha;
+var constant=(motw+(motmp*(Math.sin(Math.PI * (theta) / 180.0)*Math.sin(Math.PI * (theta) / 180.0))));
+		a = ((motmp+motw)*g * Math.sin(Math.PI * (theta) / 180.0))/constant;     
+		A =  motmp * g * Math.sin(Math.PI * (theta) / 180.0) * Math.cos(Math.PI * (theta) / 180.0)/constant;
+		vmass=Math.sqrt(2*m*a);
+		t=vmass/a;
+        vwedge=t*A;
+     	var options = document.getElementById("button");
+		options.innerHTML = options.innerHTML +' <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Velocity of Wedge when mass leave the wedge : </strong>'+vwedge+'<strong> m/s</strong></div>';
+
+} 
+function timebutton()
+{
+theta = alpha;
+var constant=(motw+(motmp*(Math.sin(Math.PI * (theta) / 180.0)*Math.sin(Math.PI * (theta) / 180.0))));
+		a = ((motmp+motw)*g * Math.sin(Math.PI * (theta) / 180.0))/constant;
+        vmass=Math.sqrt(2*m*a);
+		t=vmass/a;
+     	var options = document.getElementById("button");
+		options.innerHTML = options.innerHTML +' <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Time taken by mass to leave the wedge : </strong>'+t+'<strong> s</strong></div>';
+
+} 
+
+
+</script>
+	
+	
+
+
+	
+	
+	
+
+
+	<div class = "page-footer">
+	<center>© Copyright 2015-UOJ-RAD-GROUP-15. All Rights Reserved.</center>
+	</div>	
+	
+	</div>
+
+<!-- Modal -->
+<!-- Modal -->
+<div class="modal fade" id="myModalNorm" tabindex="-1" role="dialog" 
+     aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close" 
+                   data-dismiss="modal">
+                       <span aria-hidden="true">&times;</span>
+                       <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Insert following fields
+                </h4>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="modal-body">
+                
+                <form role="form" action="#" id="form" method="post" name="form" onsubmit="return false;">
+				
+                  <div class="form-group">
+                    <label for="motmp">Mass of the mass particle (grams)</label>
+                      <input type="number"  class="form-control"
+                      id="motmp" placeholder="Mass of the mass particle" min="1" required/>
+                  </div>
+				  
+				  <div class="form-group">
+                    <label for="motw">Mass of the wedge (grams)</label>
+                      <input type="number" class="form-control"
+                      id="motw" placeholder="Mass of the wedge" min="1" required/>
+                  </div>
+				  
+				  <div class="form-group">
+                    <label for="how">Height of the wedge (centimeters)</label>
+                      <input type="number" class="form-control"
+                      id="how" placeholder="Height of the wedge" min="1" max="100" required/>
+                  </div>
+				  
+				  <div class="form-group">
+                    <label for="alpha">Angle of the wedge (degrees)</label>
+                      <input type="number" class="form-control"
+                      id="alpha" placeholder="Angle of the wedge" min="11" max="85" required/>
+                  </div>
+              <button type="submit" class="btn btn-primary">Confirm Entered Values</button></br></br>
+                  <button type="button" class="btn btn-default"
+                        data-dismiss="modal">
+                            Close
+                </button>
+                  <button type="submit" class="btn btn-primary" onclick="begin();animatebutton();massa();wedgea();vmass();vwedge();tboth();resetbutton();" data-dismiss="modal">Submit</button>
+                </form> 
+                
+                
+            </div>
+       
+        </div>
+    </div>
+</div>
+</body>
+</html>
